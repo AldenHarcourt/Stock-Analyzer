@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": [
+        "."
+    ],
+    "java.project.referencedLibraries": [
+        "lib\\gson-2.11.0.jar",
+        "c:\\Users\\alden\\OneDrive\\Documents\\GitHub\\Stock-Analyzer\\lib\\gson-2.11.0.jar"
+    ]
+}

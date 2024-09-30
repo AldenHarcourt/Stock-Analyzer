@@ -5,141 +5,168 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Scanner;
 
-// Add JSON imports
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-public class StockTicker {
+public class StockTicker2 {
 
-   public static final int STOCKS_NUM = 10;  // max. number of stocks allowed
-   public static final int DATA_TYPES = 3;   // number of data types
-    
-   public static void main(String[] args) throws IOException, InterruptedException {
-       
-      Scanner console = new Scanner(System.in);       // input console
-      
-      String[] tickers = new String[STOCKS_NUM];      // stock tickers
-      String[] stockStrings = new String[STOCKS_NUM]; // stock info
-      
-      String[] dataTypes = new String[DATA_TYPES];    // stock data type
-      dataTypes[0] = "regularMarketPrice";            // stock price per share
-      dataTypes[1] = "forwardPE";                     // forward Price Earning (PE) ratio
-      dataTypes[2] = "priceToBook";                   // price to book ratio
-      
-      // Descriptions in the output table
-      String[] dataTypesDisplay = new String[DATA_TYPES];
-      dataTypesDisplay[0] = "Price Per Share";
-      dataTypesDisplay[1] = "Forward PE Ratio";
-      dataTypesDisplay[2] = "Price To Book Ratio";
+    public static final int STOCKS_NUM = 10;  // max. number of stocks allowed
+    public static final int DATA_TYPES = 3;   // number of data types
 
-      // Prompts the user for the number of stocks            
-      int numOfStocks = Intro(console);
+    public static void main(String[] args) throws IOException, InterruptedException {
 
-      // Prompts the user for the stock ticker(s)
-      String urlTickers = getUrlTickers(console, numOfStocks, tickers);
+        Scanner console = new Scanner(System.in);       // input console
 
-      // Gets real-time stock data from Yahoo Finance       
-      HttpClient client = HttpClient.newHttpClient();    // Establishes a new HTTP client
+        String[] tickers = new String[STOCKS_NUM];      // stock tickers
 
-      // Builds the request with the ticker(s) per Yahoo Finance API for the stock quotes,
-      // the API key is assigned when registering for the Yahoo Finance API service.     
-      HttpRequest request = HttpRequest.newBuilder()
-             .uri(URI.create("https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=" + urlTickers))
-             .header("x-api-key", "YOUR_VALID_API_KEY_HERE") // Replace with your valid API key
-             .method("GET", HttpRequest.BodyPublishers.noBody())
-             .build();
+        String[] dataTypes = new String[DATA_TYPES];    // stock data type
+        dataTypes[0] = "regularMarketPrice";            // stock price per share
+        dataTypes[1] = "forwardPE";                     // forward Price Earning (PE) ratio
+        dataTypes[2] = "priceToBook";                   // price to book ratio
 
-      // Sends the request to Yahoo Finance and receives the stock quote   
-      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-      
-      // Converts the stock quote data into a text string
-      String quoteResponse = response.body();
+        // Descriptions in the output table
+        String[] dataTypesDisplay = new String[DATA_TYPES];
+        dataTypesDisplay[0] = "Price Per Share";
+        dataTypesDisplay[1] = "Forward PE Ratio";
+        dataTypesDisplay[2] = "Price To Book Ratio";
 
-      // Gets the info for each stock     
-      getStockData(tickers, numOfStocks, quoteResponse, stockStrings);
-      
-      // Prints the stock info in the output table
-      printStockData(tickers, dataTypes, numOfStocks, stockStrings, dataTypesDisplay);      
-   }
-   
-   // ... [Intro and getUrlTickers methods remain unchanged] ...
+        // Prompts the user for the number of stocks
+        int numOfStocks = Intro(console);
 
-   // Parses the stock quote data for each stock using JSON parsing
-   public static void getStockData(String[] tickers, int numOfStocks, String quoteResponse, String[] stockStrings) {
-  
-      JSONObject jsonResponse = new JSONObject(quoteResponse);
-      JSONObject quoteResponseObj = jsonResponse.getJSONObject("quoteResponse");
-      JSONArray resultArray = quoteResponseObj.getJSONArray("result");
+        // Prompts the user for the stock ticker(s)
+        String urlTickers = getUrlTickers(console, numOfStocks, tickers);
 
-      for (int i = 0; i < numOfStocks; i++) {
-          boolean found = false;
-          for (int j = 0; j < resultArray.length(); j++) {
-              JSONObject stockObj = resultArray.getJSONObject(j);
-              if (stockObj.getString("symbol").equals(tickers[i])) {
-                  stockStrings[i] = stockObj.toString();
-                  found = true;
-                  break;
-              }
-          }
-          if (!found) {
-              // Tells the user the ticker is not valid
-              System.out.printf("%s is not a valid ticker\n", tickers[i]);
-              // No info for the ticker
-              stockStrings[i] = null;
-          }
-      }
-   }
-   
-   // Prints the stock info in a table for comparison   
-   public static void printStockData(String[] tickers, String[] dataTypes, int numOfStocks, String[] stockStrings, String[] dataTypesDisplay) {
+        // Gets real-time stock data from Yahoo Finance
+        HttpClient client = HttpClient.newHttpClient();    // Establishes a new HTTP client
 
-      // 1st column is 22 spaces
-      System.out.printf("%22s", " ");
-      
-      // The rest of columns are 8 spaces right aligned
-      for(int i = 0; i < numOfStocks; i++) {
-         System.out.printf("%8s",tickers[i]);             
-      }
-      
-      // New line
-      System.out.println();
+        // Builds the request with the ticker(s) per Yahoo Finance API for the stock quotes
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=" + urlTickers))
+                .header("x-api-key", "U6bD4zA5MCu2SRZChaWfjXBDDA2mWqGl") // Replace with your actual API key
+                .GET()
+                .build();
 
-      // Prints each data type for all stock tickers
-      for(int i = 0; i < DATA_TYPES; i++) {
+        // Sends the request to Yahoo Finance and receives the stock quote
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-         // 1st column is data type 22 spaces left aligned for each data type
-         System.out.printf("%-22s", dataTypesDisplay[i]);
-         
-         // For all stock tickers                     
-         for (int j = 0; j < numOfStocks; j++) {
-         
-            if (stockStrings[j] != null) {
+        // Parses the JSON response
+        JsonObject[] stockData = parseJsonResponse(tickers, numOfStocks, response.body());
 
-               JSONObject stockObj = new JSONObject(stockStrings[j]);
+        // Prints the stock info in the output table
+        printStockData(tickers, dataTypes, numOfStocks, stockData, dataTypesDisplay);
+    }
 
-               if (stockObj.has(dataTypes[i]) && !stockObj.isNull(dataTypes[i])) {
-                  double data = stockObj.getDouble(dataTypes[i]);
-                  
-                  // Rounds to 2 digits after the decimal point
-                  double roundedData = Math.round(data * 100.0) / 100.0;  
-                  System.out.printf("%8.2f", roundedData);
-               } else {
-                  // If data is not available
-                  System.out.printf("%8s", "N/A");
-               }
-               
-            } else {
-            
-               // If data is not available, prints spaces
-               System.out.printf("%8s", " ");             
+    // Prompts the user for the number of stocks interested, returning the number of stocks
+    public static int Intro(Scanner console) {
+
+        // Program info
+        System.out.println("Hello user! Enter one or more stock tickers and this program will show you the relevant information.");
+        System.out.println("If you enter more than one ticker, the information will be compared between the stocks.");
+
+        // Prompts for the number of stocks
+        System.out.print("Number of stocks: ");
+        int numOfStocks = console.nextInt();
+
+        // Caps the number of stocks allowed
+        if (numOfStocks > STOCKS_NUM) {
+            numOfStocks = STOCKS_NUM;
+            System.out.println("Only " + STOCKS_NUM + " stocks are allowed.");
+        }
+
+        return numOfStocks;
+    }
+
+    // Prompts the user for the stock ticker(s), returning one string for the stock ticker(s)
+    public static String getUrlTickers(Scanner console, int numOfStocks, String[] tickers) {
+
+        // Prompts the user
+        if (numOfStocks == 1) {
+            System.out.println("Please enter " + numOfStocks + " ticker:");
+        } else {
+            System.out.println("Please enter " + numOfStocks + " tickers:");
+        }
+
+        // Prompts for stock ticker(s)
+        for (int i = 0; i < numOfStocks; i++) {
+
+            // Prompts for each stock ticker
+            System.out.print("Stock ticker " + (i + 1) + ": ");
+            tickers[i] = console.next();
+
+            // Converts to upper case since the user might enter the ticker as lower case
+            tickers[i] = tickers[i].toUpperCase();
+        }
+
+        StringBuilder urlTickers = new StringBuilder(tickers[0]);
+
+        // For multiple stock tickers, "%2C" is the separator between stock tickers.
+        if (numOfStocks > 1) {
+            for (int j = 1; j < numOfStocks; j++) {
+                urlTickers.append("%2C").append(tickers[j]);
             }
-         }
-         
-         // New line
-         System.out.println();
-      }
-   }
+        }
 
-   // ... [Include unchanged methods here: Intro and getUrlTickers] ...
+        return urlTickers.toString();
+    }
 
+    // Parses the JSON response and returns an array of JsonObjects containing stock data
+    public static JsonObject[] parseJsonResponse(String[] tickers, int numOfStocks, String responseBody) {
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
+
+        JsonArray results = jsonObject.getAsJsonObject("quoteResponse").getAsJsonArray("result");
+        JsonObject[] stockData = new JsonObject[numOfStocks];
+
+        for (int i = 0; i < numOfStocks; i++) {
+            boolean found = false;
+            for (int j = 0; j < results.size(); j++) {
+                JsonObject stock = results.get(j).getAsJsonObject();
+                if (stock.get("symbol").getAsString().equals(tickers[i])) {
+                    stockData[i] = stock;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                System.out.printf("%s is not a valid ticker or data is unavailable.\n", tickers[i]);
+                stockData[i] = null;
+            }
+        }
+        return stockData;
+    }
+
+    // Prints the stock info in a table for comparison
+    public static void printStockData(String[] tickers, String[] dataTypes, int numOfStocks, JsonObject[] stockData, String[] dataTypesDisplay) {
+
+        // Header row
+        System.out.printf("%-22s", " ");
+        for (int i = 0; i < numOfStocks; i++) {
+            System.out.printf("%8s", tickers[i]);
+        }
+        System.out.println();
+
+        // Print each data type for all stock tickers
+        for (int i = 0; i < DATA_TYPES; i++) {
+            // First column is data type
+            System.out.printf("%-22s", dataTypesDisplay[i]);
+
+            // For all stock tickers
+            for (int j = 0; j < numOfStocks; j++) {
+                if (stockData[j] != null && stockData[j].has(dataTypes[i])) {
+                    try {
+                        double dataValue = stockData[j].get(dataTypes[i]).getAsDouble();
+                        System.out.printf("%8.2f", dataValue);
+                    } catch (Exception e) {
+                        // Handle cases where the data is not a double or is null
+                        System.out.printf("%8s", "N/A");
+                    }
+                } else {
+                    // If data is not available, print N/A
+                    System.out.printf("%8s", "N/A");
+                }
+            }
+            System.out.println();
+        }
+    }
 }
