@@ -1,4 +1,6 @@
 # Stock-Analyzer
+Alden Harcourt and Kevin Huang
+
 README
 
 Gaining access to the API:
@@ -20,3 +22,6 @@ that the user enters.
 -only accepts equity, no mutual funds, ETFs, crypto, etc.
 3) Then, the program will display a data table with the
 current market price, forward PE ratio, and price to book ratio.
+
+IMPORTANT: Due to recent changes in the implementation of the Yahoo Finance API
+the program no longer runs as intented. 
